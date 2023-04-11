@@ -3,10 +3,9 @@ package com.expertsoft.tasks;
 import com.expertsoft.model.*;
 import com.expertsoft.util.AveragingBigDecimalCollector;
 
+import javax.swing.text.html.Option;
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -101,11 +100,24 @@ class OrderStats {
      */
         //Email / Credit Card
     static Map<String, Long> cardsCountForCustomer(final Stream<Customer> customers) {
-//        return customers.collect(Collectors.groupingBy(c -> c.getOrders()
-//                .stream()
-//                        .filter(f -> f.getPaymentInfo().getCardNumber())
-//                )
-//        )
+
+
+//        Map<String, Integer> map = users.stream()
+//                .collect(Collectors.toMap(User::getName, User::getAge));
+
+
+        //Streams are for a list of elements
+        //As it just asked for the number of credit cards we use .count
+       return customers.collect(Collectors.toMap(m -> m.getEmail(),
+               m -> m.getOrders()
+                       .stream()
+                       .map(f -> f.getPaymentInfo())
+                       .map(n -> n.getCardNumber())
+                       .distinct()
+                       .count()
+
+                ));
+
     }
 
     /**
@@ -129,8 +141,36 @@ class OrderStats {
      * @return java.util.Optional containing the name of the most popular country
      */
     static Optional<String> mostPopularCountry(final Stream<Customer> customers) {
+
+        Map<String, Long> uwu = customers.collect(Collectors.groupingBy(c -> c.getAddress().getCountry(),
+                Collectors.mapping(customer -> customer.getAddress().getCountry(), Collectors.counting()
+                )));
+        Optional uw = uwu.entrySet().stream().max(Comparator.comparing(key -> key.getKey()));
+        System.out.println(uw);
+
+        for (Map.Entry entry : uwu.entrySet()) {
+            return (Optional<String>) entry.getKey();
+
+        }
         return null;
     }
+
+                //key  //value
+                //  //country
+
+//        return customers.collect(Collectors
+//                .toMap(m -> m.getAddress().getCountry(), m -> m.count))
+//                .getOrDefault()
+
+//        Optional<Operation> maxOp = names.stream()
+//                .map (name -> new Operation(name, name.length()))
+//                .max (Comparator.comparingInt(Operation::getLength()));
+//        Operation longest = maxOp.get();
+//
+//        System.out.println(longest.getName() + " " + longest.getLength());
+
+
+//----------------------------------------------------------------------------
 
     /**
      * Task 6 (⚫⚫⚫⚫⚫)

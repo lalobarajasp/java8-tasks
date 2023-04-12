@@ -7,6 +7,7 @@ import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -58,7 +59,6 @@ class OrderStats {
     }
 
 
-
     /**
      * Task 3 (⚫⚫⚫⚪⚪)
      *
@@ -84,10 +84,7 @@ class OrderStats {
                 .stream()
                 .anyMatch(i -> i.getProduct().getColor().equals(color)));
 
-
-
     }
-
 
 
     /**
@@ -142,35 +139,17 @@ class OrderStats {
      */
     static Optional<String> mostPopularCountry(final Stream<Customer> customers) {
 
-        Map<String, Long> uwu = customers.collect(Collectors.groupingBy(c -> c.getAddress().getCountry(),
-                Collectors.mapping(customer -> customer.getAddress().getCountry(), Collectors.counting()
-                )));
-        Optional uw = uwu.entrySet().stream().max(Comparator.comparing(key -> key.getKey()));
-        System.out.println(uw);
+        Map<String, Long> optionalMap = customers.collect(Collectors.groupingBy(c -> c.getAddress().getCountry(),
+                Collectors.mapping(customer -> customer.getAddress().getCountry(), Collectors.counting())));
 
-        for (Map.Entry entry : uwu.entrySet()) {
-            return (Optional<String>) entry.getKey();
+        Optional optional = optionalMap.entrySet()
+                .stream()
+                .max(Comparator.comparing(value -> value.getValue()))
+                .map(key -> key.getKey());
 
-        }
-        return null;
+        return optional;
     }
 
-                //key  //value
-                //  //country
-
-//        return customers.collect(Collectors
-//                .toMap(m -> m.getAddress().getCountry(), m -> m.count))
-//                .getOrDefault()
-
-//        Optional<Operation> maxOp = names.stream()
-//                .map (name -> new Operation(name, name.length()))
-//                .max (Comparator.comparingInt(Operation::getLength()));
-//        Operation longest = maxOp.get();
-//
-//        System.out.println(longest.getName() + " " + longest.getLength());
-
-
-//----------------------------------------------------------------------------
 
     /**
      * Task 6 (⚫⚫⚫⚫⚫)
@@ -193,6 +172,16 @@ class OrderStats {
      */
     static BigDecimal averageProductPriceForCreditCard(final Stream<Customer> customers, final String cardNumber) {
         final AveragingBigDecimalCollector collector = new AveragingBigDecimalCollector();
-        return null;
+
+        //IntStream is a sequence of primitive int-value elements and a specialized stream for manipulating int values.
+        //rangeClosed() is also used to generate the numbers in the order with incremental by one
+        // but it includes the end index of this method.
+        return customers.flatMap(f -> f.getOrders().stream())
+                .filter(n -> n.getPaymentInfo().getCardNumber().equals(cardNumber))
+                .flatMap(fm -> fm.getOrderItems().stream())
+                .flatMap(range -> IntStream.rangeClosed(1, range.getQuantity()).mapToObj(num -> range.getProduct()))
+                .map(price -> price.getPrice())
+                .collect(collector);
+
     }
 }
